@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Assembly - Demo</title>
+    <style>
+        canvas {
+            margin: auto;
+            border: 1px solid black;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="animation-playground" width="800px" height="800px"></canvas>
+    <script>
+        const animationPlayground = document.getElementById("animation-playground");
+        const ctx = animationPlayground.getContext("2d");
+
+        const render = (dataArrayLength, circleStructSize) => {
+            ctx.clearRect(0, 0, animationPlayground.width, animationPlayground.height);
+            let circlesData = new Int32Array(Module.HEAP32.buffer,
+                _get_circles(animationPlayground.width, animationPlayground.height),
+                dataArrayLength);
+            for (let at = 0; at < circlesData.length; at += circleStructSize) {
+                const [x, y, radius, r, g, b, a] = circlesData.slice(at, at + circleStructSize);
+                ctx.beginPath()
+                ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+                ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
+                ctx.fill();
+            }
+
+            window.requestAnimationFrame(() => {
+                render(dataArrayLength, circleStructSize);
+            });
+        };
+    </script>
+    <script src="player.js"></script>
+</body>
+</html>
